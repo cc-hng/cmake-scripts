@@ -18,14 +18,6 @@ if (CMAKE_CXX_FLAGS_RELWITHDEBINFO MATCHES " -g ")
   string(REPLACE " -g " " -g1 " CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 endif()
 
-# Debug builds: fixed GCC/Clang flag set.
-foreach(lang C CXX)
-  if(CMAKE_${lang}_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_${lang}_FLAGS_DEBUG
-        "-O0 -g -fno-omit-frame-pointer -fno-stack-protector -fno-sanitize=undefined")
-  endif()
-endforeach()
-
 # being a cross-platform target, we enforce standards conformance on MSVC all compile:
 # https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
 if (LINUX)
@@ -37,19 +29,20 @@ if (LINUX)
   # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftree-vectorize -funroll-loops")
   # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftree-vectorize -funroll-loops")
 
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -static-libstdc++ -static-libgcc")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}  -static-libstdc++ -static-libgcc")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}  -static-libstdc++ -static-libgcc")
-    # set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS}  -static-libstdc++ -static-libgcc")
-  endif()
+  foreach(v EXE SHARED MODULE)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      set(CMAKE_${v}_LINKER_FLAGS "${CMAKE_${v}_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+    endif()
+  endforeach()
+
 elseif(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
 
 endif()
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND NOT CMAKE_CXX_COMPILER MATCHES "zig$")
+if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    AND NOT CMAKE_CXX_COMPILER MATCHES "zig$")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
