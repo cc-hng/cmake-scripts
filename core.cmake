@@ -22,7 +22,7 @@ endif()
 foreach(lang C CXX)
   if(CMAKE_${lang}_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_${lang}_FLAGS_DEBUG
-        "-O0 -g -fno-omit-frame-pointer -fno-stack-protector")
+        "-O0 -g -fno-omit-frame-pointer -fno-stack-protector -fno-sanitize=undefined")
   endif()
 endforeach()
 
